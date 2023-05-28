@@ -33,18 +33,6 @@ const TestingAPIForm = () => {
       console.log("new task succesfully added to the database:", response.data);
       setResponseEducation(response.data.education);
       setUserId(response.data._id);
-      setUserDetails({
-        firstName: "",
-        lastName: "",
-        email: "",
-        NIC: "",
-        phoneNo: "",
-        address: "",
-        gender: "",
-        profession: "",
-        country: "",
-        education: "",
-      });
     } catch (error) {
       alert("Server still starting, Please try again");
       return;
@@ -63,19 +51,60 @@ const TestingAPIForm = () => {
       );
       console.log(response.data, "response.data");
 
-      createDocument(response.data.response);
+      createDocument(userDetails, response.data.response);
     } catch (error) {
       console.error(error);
       alert("Failed to connect ChatGPT");
     }
-
     setUserId("");
+    setUserDetails({
+      firstName: "",
+      lastName: "",
+      email: "",
+      NIC: "",
+      phoneNo: "",
+      address: "",
+      gender: "",
+      profession: "",
+      country: "",
+      education: "",
+    });
   };
 
-  const createDocument = (docData) => {
+  const createDocument = (personalDetails, educationDetals) => {
     //convert to pdf
     const doc = new jsPDF();
-    doc.text(docData, 10, 10);
+
+    doc.setFontSize(20);
+    doc.setTextColor(0, 0, 0);
+    doc.setFont("helvetica", "bold");
+
+    const firstNameWidth = doc.getTextWidth(personalDetails.firstName);
+    const lastNameWidth = doc.getTextWidth(personalDetails.lastName);
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const firstNameX = (pageWidth - firstNameWidth) / 2;
+    const lastNameX = (pageWidth - lastNameWidth) / 2;
+
+    doc.text(personalDetails.firstName, firstNameX, 10);
+    doc.text(personalDetails.lastName, lastNameX + 25, 10);
+
+    doc.setFontSize(12);
+    doc.setFont("helvetica", "normal");
+
+    doc.text(`\u2022 First Name : ${personalDetails.firstName}`, 30, 30);
+    doc.text(`\u2022 Last Name : ${personalDetails.lastName}`, 30, 35);
+    doc.text(`\u2022 NIC : ${personalDetails.NIC}`, 30, 40);
+    doc.text(`\u2022 Address : ${personalDetails.address}`, 30, 45);
+
+    doc.text(`\u2022 Country : ${personalDetails.country}`, 30, 65);
+    doc.text(`\u2022 Phone no : ${personalDetails.phoneNo}`, 30, 70);
+    doc.text(`\u2022 Email : ${personalDetails.email}`, 30, 75);
+    doc.text(`\u2022 Profession : ${personalDetails.profession}`, 30, 80);
+    doc.text(`\u2022 Gender : ${personalDetails.gender}`, 150, 70);
+
+    doc.text("\u2022 Education : ", 30, 100);
+    doc.text(educationDetals, 40, 100);
+
     // save the pdf document
     doc.save(`${userId}.pdf`);
   };
